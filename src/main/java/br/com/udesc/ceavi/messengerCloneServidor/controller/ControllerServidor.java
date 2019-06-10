@@ -118,11 +118,13 @@ public class ControllerServidor extends Thread {
         try {
             String line = "";
             out = new PrintWriter(conn.getOutputStream(), true);
+            Cliente cli = null;
             while (!(line = in.readLine()).equalsIgnoreCase("fimbusca")) {
-                Cliente cli = gson.fromJson(line, Cliente.class);
-                out.println(gson.toJson(ClienteDAO.buscaUser(cli.getEmail())));
-                out.println("202");
+                cli = gson.fromJson(line, Cliente.class);
+                cli = ClienteDAO.buscaUser(cli.getEmail());
             }
+            out.println(gson.toJson(cli));
+            out.println("202");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception ex) {
@@ -133,8 +135,25 @@ public class ControllerServidor extends Thread {
         }
     }
 
+    //DESENVOLVER PARA DAR MERGE NO CLIENTE
     public void adicionarContato(BufferedReader in) {
-
+        PrintWriter out = null;
+        Gson gson = new Gson();
+        try {
+            out = new PrintWriter(conn.getOutputStream(), true);
+            String line = "";
+            while (!(line = in.readLine()).equalsIgnoreCase("fimadd")) {
+                Cliente cli = gson.fromJson(line, Cliente.class);
+                ClienteDAO.update(cli);
+            }
+            out.println("200");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception ex) {
+            out.println("500");
+        } finally {
+            Desconectar.fecharInConn(in, conn);
+        }
     }
 
     public void editarUser(BufferedReader in) {
