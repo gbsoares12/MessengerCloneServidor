@@ -20,14 +20,14 @@ import javax.persistence.Query;
  */
 public class ClienteDAO {
 
-    public static Object ler(Class classe, long id) {
+    public static Object ler(Class classe, String email) {
         Object object = null;
         EntityManagerFactory emf
                 = javax.persistence.Persistence.createEntityManagerFactory("persistenciaMenssengerClone");
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         try {
-            object = em.find(classe, id);
+            object = em.find(classe, email);
             em.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,21 +55,23 @@ public class ClienteDAO {
         }
     }
 
-    public static void update(Object object) {
+    public static Cliente update(Cliente cliente) {
         EntityManagerFactory emf
                 = javax.persistence.Persistence.createEntityManagerFactory("persistenciaMenssengerClone");
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
 
         try {
-            em.merge(object);
+            em.merge(cliente);
             em.getTransaction().commit();
+            return cliente;
         } catch (Exception e) {
             e.printStackTrace();
             em.getTransaction().rollback();
         } finally {
             em.close();
         }
+        return null;
     }
 
     public static void excluir(Object objeto) {
