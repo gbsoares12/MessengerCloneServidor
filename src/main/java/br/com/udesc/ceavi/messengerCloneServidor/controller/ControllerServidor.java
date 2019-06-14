@@ -7,7 +7,10 @@ package br.com.udesc.ceavi.messengerCloneServidor.controller;
 
 import br.com.udesc.ceavi.messengerCloneServidor.DAO.ClienteDAO;
 import br.com.udesc.ceavi.messengerCloneServidor.model.Cliente;
+import br.com.udesc.ceavi.messengerCloneServidor.model.ClienteVerificador;
+import br.com.udesc.ceavi.messengerCloneServidor.model.ListaClienteVerificador;
 import br.com.udesc.ceavi.messengerCloneServidor.model.ListaConectados;
+import br.com.udesc.ceavi.messengerCloneServidor.model.VerificadorConexao;
 import br.com.udesc.ceavi.messengerCloneServidor.utils.Desconectar;
 import com.google.gson.Gson;
 import java.io.BufferedReader;
@@ -56,7 +59,7 @@ public class ControllerServidor extends Thread {
                 adicionarContato(in);
                 break;
             case "Atualizar":
-                atualizarConexao();
+                atualizarConexao(in);
                 break;
             case "RemoverUser":
                 removerContato(in);
@@ -74,6 +77,7 @@ public class ControllerServidor extends Thread {
         PrintWriter out = null;
         Gson gson = new Gson();
         ListaConectados listaCli = ListaConectados.getInstance();
+        ListaClienteVerificador listaCliVerificador = ListaClienteVerificador.getInstance();
         try {
             int porta;
 
@@ -94,8 +98,18 @@ public class ControllerServidor extends Thread {
                 cliValidacao.setIp(ipFormatado[1]);
                 cliValidacao.setStatus(true);
                 ClienteDAO.update(cliValidacao);
-                listaCli.getListaUsuarios().add(cliValidacao);
+
+                VerificadorConexao verificador = VerificadorConexao.getInstance();
+                listaCli.getListaUsuarios().add(cliValidacao);// Lista de cliente conectados
+
+                //logica de cliente verificador conectados
+                ClienteVerificador cliVerificador = new ClienteVerificador(cliValidacao, verificador.getCountVerificador());
+                listaCliVerificador.addClienteVerificador(cliVerificador);
+
                 out.println(gson.toJson(cliValidacao));
+                out.println("countVerificadorServidor");
+                out.println(verificador.getCountVerificador());
+                out.println("fimverificador");
             }
             out.println("201");
         } catch (IOException e) {
@@ -215,24 +229,56 @@ public class ControllerServidor extends Thread {
         }
     }
 
-    public void atualizarConexao() {
-
+    public void atualizarConexao(BufferedReader in) {
+        PrintWriter out = null;
+        Gson gson = new Gson();
+        ListaClienteVerificador listaCliVerificador = ListaClienteVerificador.getInstance();
+        int countAtualCliente = 1;
+        try {
+            out = new PrintWriter(conn.getOutputStream(), true);
+            String line = "";
+            Cliente cliTentadoAtualizar = null;
+            while (!(line = in.readLine()).equalsIgnoreCase("fimcountcliente")) {
+                if (line.equalsIgnoreCase("objCliente")) {
+                    cliTentadoAtualizar = gson.fromJson(in.readLine(), Cliente.class);
+                }
+                if (line.equalsIgnoreCase("countVerificadorCliente")) {
+                    countAtualCliente = Integer.parseInt(in.readLine());
+                }
+            }
+            System.out.println("\n\n@@@@@@@@@@@@@@@@@@@@@@\n\n");
+            System.out.println("COUNT DO CLIENTE: " + countAtualCliente);
+            System.out.println("\n\n@@@@@@@@@@@@@@@@@@@@@@\n\n");
+            if (cliTentadoAtualizar != null) {
+                for (ClienteVerificador cliVerificador : listaCliVerificador.getListaClientesComVerificadorConectados()) {
+                        if (cliTentadoAtualizar.getEmail().equalsIgnoreCase(cliVerificador.getCliente().getEmail())) {
+                            cliVerificador.setCountVerificadorCliente(countAtualCliente);
+                        }
+                }
+            }
+            
+            out.println(gson.toJson(ClienteDAO.buscaUser(cliTentadoAtualizar.getEmail())));
+            out.println("200");
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception ex) {
+            out.println("500");
+            ex.printStackTrace();
+        } finally {
+            Desconectar.fechar(in, out, conn);
+        }
     }
 
     public void sair(BufferedReader in) {
         PrintWriter out = null;
         Gson gson = new Gson();
-        ListaConectados listaCli = ListaConectados.getInstance();
         try {
             out = new PrintWriter(conn.getOutputStream(), true);
             String line = "";
             while (!(line = in.readLine()).equalsIgnoreCase("fimsair")) {
                 Cliente cli = gson.fromJson(line, Cliente.class);
-                listaCli.getListaUsuarios().remove(cli);
-                cli.setIp(null);
-                cli.setPorta(0);
-                cli.setStatus(false);
-                ClienteDAO.update(cli);
+                desconectarCliente(cli);
             }
             out.println("200");
         } catch (IOException e) {
@@ -243,6 +289,15 @@ public class ControllerServidor extends Thread {
         } finally {
             Desconectar.fechar(in, out, conn);
         }
+    }
+
+    public void desconectarCliente(Cliente cliente) {
+        ListaConectados listaCli = ListaConectados.getInstance();
+        listaCli.getListaUsuarios().remove(cliente);
+        cliente.setIp(null);
+        cliente.setPorta(0);
+        cliente.setStatus(false);
+        ClienteDAO.update(cliente);
     }
 
 }

@@ -9,6 +9,8 @@ import br.com.udesc.ceavi.messengerCloneServidor.controller.ControllerServidor;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -21,13 +23,17 @@ public class Servidor {
     public Servidor(int port) throws IOException {
         this.server = new ServerSocket(port);
         this.server.setReuseAddress(true);
+
     }
 
-    public void startServidor() throws IOException {
+    public void startServidor() throws IOException, InterruptedException {
+        VerificadorConexao verificaConectados = VerificadorConexao.getInstance();
+        verificaConectados.start();
+
         while (true) {
-            System.out.println("~~~Esperando requisição do usuário~~~");
+            System.out.println("~~~Usuário conectado esperando requisição do usuário~~~ ");
             Socket conn = server.accept();
-            if(conn != null){
+            if (conn != null) {
                 ControllerServidor cs = new ControllerServidor(conn);
                 cs.start();
             }
