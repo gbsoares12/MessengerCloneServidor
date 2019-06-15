@@ -12,7 +12,7 @@ package br.com.udesc.ceavi.messengerCloneServidor.model;
 public class ClienteVerificador {
 
     private int countVerificadorCliente = 0;
-    private final Cliente cliente;
+    private Cliente cliente;
 
     public ClienteVerificador(Cliente cliente, int countCliente) {
         this.countVerificadorCliente = countCliente;
@@ -31,6 +31,10 @@ public class ClienteVerificador {
         return cliente;
     }
 
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+    
     @Override
     public String toString() {
         return "ClienteVerificador{" + "countVerificadorCliente=" + countVerificadorCliente + ", cliente=" + cliente + '}';

@@ -29,7 +29,6 @@ public class Servidor {
     public void startServidor() throws IOException, InterruptedException {
         VerificadorConexao verificaConectados = VerificadorConexao.getInstance();
         verificaConectados.start();
-
         while (true) {
             System.out.println("~~~Usuário conectado esperando requisição do usuário~~~ ");
             Socket conn = server.accept();

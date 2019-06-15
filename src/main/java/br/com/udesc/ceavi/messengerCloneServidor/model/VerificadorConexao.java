@@ -6,7 +6,6 @@
 package br.com.udesc.ceavi.messengerCloneServidor.model;
 
 import br.com.udesc.ceavi.messengerCloneServidor.DAO.ClienteDAO;
-import br.com.udesc.ceavi.messengerCloneServidor.controller.ControllerServidor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +34,6 @@ public class VerificadorConexao extends Thread {
         while (true) {
 
             ListaConectados listaConectados = ListaConectados.getInstance();
-            System.out.println("TESTE TAMANHO LISTA CONECTADOS DENTRO DO VERIFICADORCONEXAO: " + listaConectados.getListaUsuarios().size());
             if (listaConectados.getListaUsuarios().size() > 0) {
                 // Caso haja alguém conectado o numero de msg de atualização tem que ser a mesma do countVerificador.
                 this.countVerificador++;
@@ -56,11 +54,6 @@ public class VerificadorConexao extends Thread {
         ClienteVerificador clienteComCount = null;
         if (!listaClienteComCount.getListaClientesComVerificadorConectados().isEmpty()) {
             for (ClienteVerificador clienteComVerificadorConectado : listaClienteComCount.getListaClientesComVerificadorConectados()) {
-                System.out.println("\n\n@@@@@@@@@@@@@@@@@@@@@@\n\n");
-                System.out.println("COUNT DO SERVIDOR: " + this.countVerificador);
-                System.out.println("\n\n@@@@@@@@@@@@@@@@@@@@@@\n\n");
-                System.out.println("COUNT DO CLIENTE: " + (clienteComVerificadorConectado.getCountVerificadorCliente()+1));
-                System.out.println("\n\n@@@@@@@@@@@@@@@@@@@@@@\n\n");
                 if ((clienteComVerificadorConectado.getCountVerificadorCliente()+1) != this.countVerificador) {
                     desconectou = desconectarCliente(clienteComVerificadorConectado.getCliente());
                     clienteComCount = clienteComVerificadorConectado;
