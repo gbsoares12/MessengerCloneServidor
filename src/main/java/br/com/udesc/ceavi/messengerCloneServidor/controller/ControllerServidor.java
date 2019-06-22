@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -75,11 +76,13 @@ public class ControllerServidor extends Thread {
     }
 
     public void manterConexao(BufferedReader in) {
+        Random intRandom = new Random();
         PrintWriter out = null;
         Gson gson = new Gson();
         ListaConectados listaCli = ListaConectados.getInstance();
         ListaClienteVerificador listaCliVerificador = ListaClienteVerificador.getInstance();
         try {
+            Thread.sleep((intRandom.nextInt(5)) * 100);
             int porta;
 
             if (listaCli.getListaUsuarios().isEmpty()) {
@@ -97,7 +100,6 @@ public class ControllerServidor extends Thread {
                 if (auxCliente.isStatus()) {
                     out.println("503");
                 } else {
-                    out.println(gson.toJson(cliValidacao));
                     //Merge com a respectiva porta no servidor e o ip do cliente.
                     auxCliente.setPorta(porta);
                     String[] ipFormatado = cli.getIp().split("/");
@@ -105,6 +107,8 @@ public class ControllerServidor extends Thread {
                     auxCliente.setStatus(true);
                     ClienteDAO.update(auxCliente);
 
+                    out.println(gson.toJson(ClienteDAO.buscaUserListaContatoSemContato(cli.getEmail())));
+                    
                     VerificadorConexao verificador = VerificadorConexao.getInstance();
                     listaCli.getListaUsuarios().add(auxCliente);// Lista de cliente conectados
 
