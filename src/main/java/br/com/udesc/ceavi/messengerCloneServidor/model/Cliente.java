@@ -14,8 +14,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+
 /**
  *
  * @author Gabriel Soares
@@ -24,7 +26,7 @@ import javax.persistence.OneToMany;
 public class Cliente implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -35,8 +37,13 @@ public class Cliente implements Serializable {
     private int porta;
     private boolean status;
     private String nome;
-    
+
     @ManyToMany
+    @JoinTable(name = "lista_contato",
+            joinColumns = {
+                @JoinColumn(name = "id_usuario")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "id_contato")})
     private List<Cliente> listaContatos = new ArrayList<>();
 
     public Cliente() {
@@ -49,7 +56,7 @@ public class Cliente implements Serializable {
     public void setNome(String nome) {
         this.nome = nome;
     }
-    
+
     public String getIp() {
         return ip;
     }
@@ -97,15 +104,15 @@ public class Cliente implements Serializable {
     public void setListaContatos(List<Cliente> listaContatos) {
         this.listaContatos = listaContatos;
     }
-    
-    public void addContato(Cliente cli){
+
+    public void addContato(Cliente cli) {
         this.listaContatos.add(cli);
     }
-    
-    public void removeContato(Cliente cli){
+
+    public void removeContato(Cliente cli) {
         this.listaContatos.remove(cli);
     }
-            
+
     public Long getId() {
         return id;
     }

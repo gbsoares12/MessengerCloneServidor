@@ -102,6 +102,14 @@ public class ClienteDAO {
             consulta.setParameter("email", email);
             consulta.setParameter("senha", senha);
             Cliente clienteBuscado = (Cliente) consulta.getSingleResult();
+
+            List<String> listaContatos = em.createNativeQuery("SELECT lc.id_contato FROM lista_contato lc WHERE lc.id_usuario = '" + email + "'").getResultList();
+
+            for (String listaContato : listaContatos) {
+                Cliente contatoSemListaContato = em.find(Cliente.class, listaContato);
+                contatoSemListaContato.setListaContatos(null);
+            }
+
             return clienteBuscado;
         } catch (NoResultException ex) {
             throw new Exception("Falha na autenticação!");
@@ -116,6 +124,27 @@ public class ClienteDAO {
             Query consulta = em.createQuery("SELECT c FROM Cliente c WHERE c.email=:email");
             consulta.setParameter("email", email);
             Cliente clienteBuscado = (Cliente) consulta.getSingleResult();
+            return clienteBuscado;
+        } catch (NoResultException ex) {
+            throw new Exception("Falha na busca!");
+        }
+    }
+
+    public static Cliente buscaUserListaContatoSemContato(String email) throws Exception {
+        EntityManagerFactory emf
+                = javax.persistence.Persistence.createEntityManagerFactory("persistenciaMenssengerClone");
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query consulta = em.createQuery("SELECT c FROM Cliente c WHERE c.email=:email");
+            consulta.setParameter("email", email);
+            Cliente clienteBuscado = (Cliente) consulta.getSingleResult();
+            List<String> listaContatos = em.createNativeQuery("SELECT lc.id_contato FROM lista_contato lc WHERE lc.id_usuario = '" + email + "'").getResultList();
+
+            for (String listaContato : listaContatos) {
+                Cliente contatoSemListaContato = em.find(Cliente.class, listaContato);
+                contatoSemListaContato.setListaContatos(null);
+            }
+
             return clienteBuscado;
         } catch (NoResultException ex) {
             throw new Exception("Falha na busca!");
